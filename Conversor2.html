@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="conversor.js"></script>
+    <link rel="stylesheet" href="conversor.css">
+    <link href=" https://economia.awesomeapi.com.br/">
+    <title>Conversor de moeda</title>
+</head>
+<body>
+  <div class="container">
+    <span id="Valor_Conversao"></span>
+    <div>
+      <select id="de_moeda"></select>
+      <input type="number" id="de_quantidade" value="1" />
+    </div>
+    <button id="converter" type="submit" onclick="calcula">converter</button>
+    <button id="troca"> ⇅ </button>
+    <div>
+      <select id="para_moeda"></select>
+      <input type="number" id="para_quantidade" />
+    </div>
+    </div>
+</body>
+<script>
+const label_de_moeda = document.getElementById('de_moeda');
+const input_de_quantidade = document.getElementById('de_quantidade');
+const label_para_moeda = document.getElementById('para_moeda');
+const input_para_quantidade = document.getElementById('para_quantidade');
+
+const Valor_Conversao = document.getElementById('Valor_Conversao');
+const troca = document.getElementById('troca');
+
+label_de_moeda.addEventListener('change', calcula);
+input_de_quantidade.addEventListener('input', calcula);
+label_para_moeda.addEventListener('change', calcula);
+input_para_quantidade.addEventListener('input', calcula);
+troca.addEventListener('click', trocarValor);
+
+main();
+
+function main() {
+  let moeda = { "BRL": "Real", "EUR": "Euro", "USD": "Dollar" };
+  let options = [];
+  for (var [key, value] of Object.entries(moeda)) {
+    options.push(`<option value='${key}'>${value}</option>`);
+  }
+  label_de_moeda.innerHTML = options.join('\n');
+  label_para_moeda.innerHTML = options.join('\n');
+  calcula();
+}
+
+function trocarValor() {
+  let temp = label_de_moeda.value;
+  label_de_moeda.value = label_para_moeda.value;
+  label_para_moeda.value = temp;
+  calcula();
+}
+
+async function getURL(url) {
+  return (await fetch(url)).json();
+}
+
+function getInfoSelect(select) {
+  return select.options[select.selectedIndex].text;
+}
+
+async function calcula() {
+  let from = label_de_moeda.value;
+  let to = label_para_moeda.value;
+  let { rates } = await getURL(`https://api.exchangerate-api.com/v4/latest/${from}`);
+  let rate = rates[to];
+  Valor_Conversao.innerText = `1 ${getInfoSelect(label_de_moeda)} = ${rate} ${getInfoSelect(label_para_moeda)}`
+  input_para_quantidade.value = (input_de_quantidade.value * rate).toFixed(2);
+}
+
+</script>
+</html>
